@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import './ListEmployeeComponent.css';
 // import { listEmployees } from '../serivice/EmployService';
-import { listEmployees,deleteEmployeeById } from '../serivice/EmployService';
+import { getEmployeeById, listEmployees, deleteEmployeeById } from '../serivice/EmployService';
 
 import { useNavigate } from 'react-router-dom';
 const ListEmployeeComponent = () => {
     // sử dụng useState để tạo mảng rổng xíu đổ data vào
     const [employees, setEmployees] = useState([]);
-
+    const [searchId, setSearchId] = useState('');
     const navToAddEmployee = useNavigate();
     const navigate = useNavigate();
     // Thằng useEffect chỉ chạy 1 lần cho thằng dependenci của nó là mảng rỗng
@@ -38,6 +38,29 @@ const ListEmployeeComponent = () => {
             });
         }
     }
+    const handleSearchById = () => {
+        if (!searchId) return;
+
+        getEmployeeById(searchId)
+            .then(res => {
+                setEmployees([res.data]); // Hiển thị đúng 1 nhân viên
+            })
+            .catch(() => {
+                alert("Không tìm thấy nhân viên!");
+                setEmployees([]); // Xoá danh sách hiện tại
+            });
+    };
+    const handleShowAll = () => {
+        listEmployees()
+            .then((res) => {
+                setEmployees(res.data);     // cập nhật danh sách
+                setSearchId('');            // reset ô tìm kiếm nếu có
+            })
+            .catch(() => {
+                console.error("Lỗi khi tải danh sách nhân viên:");
+            });
+    };
+
     return (
         <div className='container'>
             <h2 style={{
@@ -49,6 +72,32 @@ const ListEmployeeComponent = () => {
                     marginBottom: "20px"
                 }
             } onClick={addNewEmployee} >Thêm nhân viên</button>
+            <div className="d-flex align-items-center mb-3 gap-3">
+                <input
+                    type="number"
+                    className="form-control"
+                    placeholder="Nhập ID nhân viên cần tìm"
+                    value={searchId}
+                    onChange={(e) => setSearchId(e.target.value)}
+                    style={{ maxWidth: "250px" }}
+                />
+
+                <button
+                    className="btn btn-outline-success"
+                    onClick={handleSearchById}
+                >
+                    Tìm kiếm
+                </button>
+
+                <button
+                    className="btn btn-outline-secondary"
+                    onClick={handleShowAll}
+                >
+                    Xem tất cả
+                </button>
+            </div>
+
+
             <table className='table table-striped table-bordered'>
                 <thead>
                     <tr>
